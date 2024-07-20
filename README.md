@@ -84,7 +84,7 @@ yarn serve
 Открытое API
 
 ## API предоставляет следующие эндпоинты:
-###Подробнее в swagger по /docs
+### Подробнее в swagger по /docs
     
     POST /api/code/create - Сохранить новый код.
     POST /api/code/get/:id - Получить сохраненный код по ID.
