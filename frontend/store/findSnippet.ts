@@ -24,12 +24,16 @@ export const useFindSnippetStore = defineStore('findSnippet', {
     actions: {
         async find(id: number, viewPassword?: string): Promise<void> {
             try {
-                const response = await api.post(`/code/get/${id}`, {  viewPassword });
+                const response = await api.post(`/code/get/${id}`, { viewPassword });
                 const { language, code, timeAdded } = response.data;
                 this.$patch({ language, code, timeAdded });
             } catch (error) {
-                console.error('Error fetching snippet:', error);
+                if (axios.isAxiosError(error) && error.response) {
+                    throw new Error(JSON.stringify(error.response.data));
+                } else {
+                    throw error;
+                }
             }
-        },
+        }
     },
 });

@@ -21,6 +21,7 @@ const handleLanguageChange = (newLanguage: string) => {
 }
 
 const createSnippet = async () => {
+  console.log(code.value)
   if (code.value != '') {
     try {
       textSubmit.value = 'Отправка...';

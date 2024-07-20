@@ -9,7 +9,7 @@ const isCodeFounded = ref(false);
 const id = ref(1);
 const language = ref('javascript');
 const code = ref('');
-
+const errorMessage = ref('');
 const findSnippetStore = useFindSnippetStore();
 
 
@@ -24,7 +24,17 @@ const findSnippet = async () => {
     console.log(code.value)
   } catch (error) {
     disableSubmit.value = false;
-    textSubmit.value = 'Попробовать ещё раз';
+    textSubmit.value = 'Найти';
+    try {
+      const errorData = JSON.parse(error.message);
+      if (errorData.errorCode === 'INVALID_PASSWORD') {
+        errorMessage.value = 'Введен неверный пароль. Пожалуйста, попробуйте снова.';
+      } else {
+        errorMessage.value = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
+      }
+    } catch (parseError) {
+      errorMessage.value = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
+    }
   } finally {
     disableSubmit.value = false;
     textSubmit.value = 'Найти';
@@ -37,6 +47,7 @@ const findSnippet = async () => {
   <h2 class="visually-hidden">Здесь вы можете найти код</h2>
   <CodeEditor :editorLanguageProps="language" :code-value="code" v-if="isCodeFounded" />
   <form v-else class="search-cell__form" @submit.prevent="findSnippet">
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <Input class="search-cell__input" inputLabel="Введите ID" v-model="id" min="1" type="number" />
     <Input class="search-cell__input" inputLabel="Введите пароль для просмотра" v-model="viewPassword" type="password" />
     <SubmitButton :disabled="disableSubmit" :text-submit="textSubmit" />
@@ -58,6 +69,11 @@ const findSnippet = async () => {
   align-items: center;
   gap: 20px;
   justify-content: center;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
 }
 
 @media (max-width: 600px) {
