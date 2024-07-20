@@ -1,10 +1,8 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, Res, BadRequestException, Query} from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param } from '@nestjs/common';
 import { CodeService } from './code.service';
 import { CreateCodeDto } from './dto/create-code.dto';
 import { UpdateCodeDto } from './dto/update-code.dto';
-import {FindCodeDto} from "./dto/find-code.dto";
-import { FastifyReply } from 'fastify';
-import path from "node:path";
+import { FindCodeDto } from './dto/find-code.dto';
 
 @Controller('code')
 export class CodeController {

@@ -6,7 +6,7 @@
   <nav class="nav">
     <NuxtLink class="nav__link" to="/">Создать</NuxtLink>
     <NuxtLink class="nav__link" to='/find'>Найти</NuxtLink>
-    <NuxtLink class="nav__link" to='/docs'>Доки</NuxtLink>
+    <NuxtLink class="nav__link" to='https://api.codether/docs'>Доки</NuxtLink>
   </nav>
 </template>
 

@@ -1,3 +1,3 @@
 export class FindCodeDto {
-    viewPassword?: string;
+  viewPassword?: string;
 }

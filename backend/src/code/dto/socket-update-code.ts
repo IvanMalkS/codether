@@ -1,5 +1,5 @@
 export class UpdateSocketCodeDto {
-    id: number;
-    updatePassword: string;
-    code: string;
+  id: number;
+  updatePassword: string;
+  code: string;
 }

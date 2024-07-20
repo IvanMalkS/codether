@@ -1,21 +1,25 @@
 <template>
   <section class="code-editor">
-    <div class="code-editor__container container">
-      <div ref="editorContainer" :data-mode-id="props.editorLanguageProps" class="editor-container"></div>
+    <div ref="editorContainer" :data-mode-id="props.editorLanguageProps" class="editor-container">
+      <div v-if="isEditorLoading" class="code-editor__loading">Загрузка...</div>
     </div>
-    <div v-if="isEditorLoading" class="code-editor__loading">Загрузка пожалуйста подождите</div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, type Ref, watch } from 'vue';
+import { defineEmits } from 'vue';
 
+const emit = defineEmits(['code-updated']);
 const props = defineProps({
   editorLanguageProps: {
     type: String,
-    default: 'javascript'
+    default: 'javascript',
+  },
+  codeValue: {
+    type: String,
   }
-})
+});
 
 const defaultCodeSnippets: Record<string, string> = {
   javascript: 'function hello() {\n\talert("Hello, world!");\n}',
@@ -34,16 +38,13 @@ const defaultCodeSnippets: Record<string, string> = {
   go: 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, world!")\n}',
 };
 
-
-const editorContainer: Ref<HTMLElement | null> = ref(null)
-let editor: any = null
-const isEditorLoading = ref(true)
-
-
+const editorContainer: Ref<HTMLElement | null> = ref(null);
+let editor: any = null;
+const isEditorLoading = ref(true);
 
 const initializeEditor = () => {
   if (editorContainer.value) {
-    const defaultCode = defaultCodeSnippets[props.editorLanguageProps] || 'function hello() {\n\talert("Hello, world!");\n}'; // Fallback to JavaScript if no match
+    const defaultCode = props.codeValue || defaultCodeSnippets[props.editorLanguageProps] || 'function hello() {\n\talert("Hello, world!");\n}'; // Fallback to JavaScript if no match
     // @ts-ignore
     editor = monaco.editor.create(editorContainer.value, {
       value: defaultCode,
@@ -54,10 +55,19 @@ const initializeEditor = () => {
       fontSize: window.innerWidth <= 600 ? 12 : 14,
       renderLineHighlight: 'all',
       wordWrap: 'on'
-    })
-    isEditorLoading.value = false
+    });
+    isEditorLoading.value = false;
   }
-}
+};
+
+const attachChangeEvent = () => {
+  if (editor) {
+    editor.onDidChangeModelContent(() => {
+      const currentCode = editor.getValue();
+      emit('code-updated', currentCode);
+    });
+  }
+};
 
 // Load Monaco Editor via cdn for better performance and stability
 const loadMonacoEditor = () => {
@@ -90,56 +100,64 @@ watch(() => props.editorLanguageProps, (newVal) => {
     initializeEditor(); // Initialize the editor if it's not already initialized
   }
 }, { immediate: true });
+
 onMounted(() => {
   nextTick().then(() => {
-    loadMonacoEditor()
+    loadMonacoEditor();
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('resize', updateEditorSettings)
+      window.addEventListener('resize', updateEditorSettings);
     }
-  })
-
-})
+  });
+});
 
 onBeforeUnmount(() => {
   if (editor) {
-    editor.dispose()
+    editor.dispose();
   }
 
   if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', updateEditorSettings)
+    window.removeEventListener('resize', updateEditorSettings);
   }
-})
+});
 
 const updateEditorSettings = () => {
   if (editor) {
     editor.updateOptions({
       fontSize: window.innerWidth <= 600 ? 12 : 20,
-      minimap: {enabled: window.innerWidth > 600}
-    })
+      minimap: { enabled: window.innerWidth > 600 }
+    });
   }
-}
+};
 </script>
 
 <style scoped>
+.code-editor {
+  height: 400px;
+  border: 1px solid #45A29E;
+  position: relative;
+  background-color: #1E1E1E;
+}
+
 .editor-container {
-  height: 55vh;
-  border: 1px solid #ccc;
+  height: 100%;
+  border: 1px solid #45A29E;
   position: relative;
   background-color: #1E1E1E;
 }
 
 @media (max-width: 600px) {
-  .editor-container {
+  .code-editor {
     height: 400px;
   }
 }
 
 @media (max-width: 480px) {
-  .editor-container {
+  .code-editor {
     height: 300px;
   }
 }
+
 .code-editor__loading {
   width: 100%;
   height: 100%;
