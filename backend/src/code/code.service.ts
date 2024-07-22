@@ -75,7 +75,6 @@ export class CodeService {
     if (newCode.editPassword === '') {
       newCode.editPassword = null;
     }
-    console.log(newCode);
     if (newCode.viewPassword) {
       newCode.viewPassword = await bcrypt.hashSync(newCode.viewPassword, 10);
     }
