@@ -8,6 +8,7 @@ import {
 import helmet from '@fastify/helmet';
 import fastifyCsrf from '@fastify/csrf-protection';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import * as process from 'node:process';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -41,6 +42,17 @@ async function bootstrap() {
   // Initialize app
   await app.listen(8000);
 
+  // Connect Redis
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.REDIS,
+    options: {
+      host: process.env.REDIS_HOST,
+      port: +process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+    },
+  });
+
+  // Connect Kafka
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
     options: {

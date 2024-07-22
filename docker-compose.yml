@@ -24,6 +24,7 @@ services:
     depends_on:
       - kafka
       - postgresql
+      - redis
     environment:
       KAFKA_BROKER_URL: kafka:9092
       DB_TYPE: postgres
@@ -33,6 +34,17 @@ services:
       DB_PASSWORD: custom_password
       DB_DATABASE: custom_db
       DB_SYNCHRONIZE: "true"
+      REDIS_HOST: 1.1.1.1
+      REDIS_PORT: 6378
+      REDIS_PASSWORD: custom_password
+
+  redis:
+    environment:
+      - REDIS_PASSWORD: custom_password
+      - REDIS_PORT: 6379
+      - REDIS_DATABASE: 1
+    ports:
+      - "6378:6379"
 
   postgresql:
     image: postgres:latest
