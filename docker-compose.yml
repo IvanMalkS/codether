@@ -37,6 +37,13 @@ services:
       REDIS_HOST: 1.1.1.1
       REDIS_PORT: 6378
       REDIS_PASSWORD: custom_password
+      AWS_ACCESS_KEY_ID: custom_key
+      AWS_SECRET_ACCESS_KEY: custom_secret
+      AWS_REGION: custom_region
+      AWS_BUCKET_NAME: custom_bucket
+      AWS_BUCKET_URL: custom_url
+      AWS_ENDPOINT: custom_endpoint
+
 
   redis:
     environment:
