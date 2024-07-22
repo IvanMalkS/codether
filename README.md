@@ -1,4 +1,4 @@
-### Codether
+# Codether
 
 ⚠️ Внимание: Этот проект находится в стадии разработки. Некоторые функции могут быть недоступны или работать некорректно.
 
@@ -21,7 +21,7 @@ Codether - это полнофункциональное веб-приложен
 - Backend: NestJS (TypeScript)
 - Frontend: VueJS (TypeScript)
 - SSR: Nuxt
-- DB: PostgeSQL
+- DB: PostgeSQL, S3, Redis
 - Broker: Apache Kafka
 
 ## Особенности
