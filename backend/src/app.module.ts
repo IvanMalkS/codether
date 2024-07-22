@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CodeModule } from './code/code.module';
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import {RateLimitMiddleware} from "./middleware/rate-limit.middleware";
+import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
 
 @Module({
   imports: [
@@ -27,10 +27,10 @@ import {RateLimitMiddleware} from "./middleware/rate-limit.middleware";
   ],
   controllers: [],
   providers: [
-      {
-        provide: APP_GUARD,
-        useClass: RateLimitMiddleware,
-      },
+    {
+      provide: APP_GUARD,
+      useClass: RateLimitMiddleware,
+    },
   ],
 })
 export class AppModule {}

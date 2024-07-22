@@ -1,0 +1,51 @@
+# For Development Environment
+version: '1.0'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  backend:
+    image: your-backend-image
+    ports:
+      - "8000:8000"
+    depends_on:
+      - kafka
+      - postgresql
+    environment:
+      KAFKA_BROKER_URL: kafka:9092
+      DB_TYPE: postgres
+      DB_HOST: custom_host
+      DB_PORT: custom_port
+      DB_USERNAME: custom_user
+      DB_PASSWORD: custom_password
+      DB_DATABASE: custom_db
+      DB_SYNCHRONIZE: "true"
+
+  postgresql:
+    image: postgres:latest
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: custom_user
+      POSTGRES_PASSWORD: custom_password
+      POSTGRES_DB: custom_db
+
+  frontend:
+    image: your-frontend-image
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

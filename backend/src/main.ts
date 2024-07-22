@@ -7,6 +7,7 @@ import {
 } from '@nestjs/platform-fastify';
 import helmet from '@fastify/helmet';
 import fastifyCsrf from '@fastify/csrf-protection';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -38,8 +39,21 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // Initialize app
-  await app.listen(3123);
+  await app.listen(8000);
 
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [process.env.KAFKA_BROKER_URL],
+        connectionTimeout: 10000,
+        requestTimeout: 30000,
+        retry: {
+          retries: 5,
+        },
+      },
+    },
+  });
   await app.startAllMicroservices();
 }
 
