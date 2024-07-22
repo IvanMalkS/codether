@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UseGuards,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCodeDto } from './dto/create-code.dto';
@@ -7,17 +12,20 @@ import { Code } from './entities/code.entity';
 import { classToPlain } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { FindCodeDto } from './dto/find-code.dto';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import { ClientKafka, MessagePattern } from '@nestjs/microservices';
 
 @Injectable()
 export class CodeService {
   constructor(
     @InjectRepository(Code)
     private codeRepository: Repository<Code>,
+    @Inject('KAFKA_CLIENT') private client: ClientKafka,
   ) {}
 
   // For future code for example downloads by password
+
+  @MessagePattern('find_one_and_validate')
   async findOneAndValidate(
     id: number,
     findCodeDto: FindCodeDto,
@@ -55,6 +63,7 @@ export class CodeService {
 
   // Limit rate of files uploaded to 10 per minute
   @UseGuards(RateLimitMiddleware)
+  @MessagePattern('create')
   async create(createCodeDto: CreateCodeDto): Promise<Code> {
     const newCode = this.codeRepository.create(createCodeDto);
     const codeSize = Buffer.from(createCodeDto.code).length;
@@ -89,14 +98,15 @@ export class CodeService {
     code.language = newCode.language;
     code.timeAdded = newCode.timeAdded;
     code.timeExpired = newCode.timeExpired;
-
     return code;
   }
 
+  @MessagePattern('find_one')
   async findOne(id: number, findCodeDto: FindCodeDto): Promise<any> {
     return await this.findOneAndValidate(id, findCodeDto);
   }
 
+  @MessagePattern('update')
   async update(id: number, updateCodeDto: UpdateCodeDto) {
     const code = await this.codeRepository.findOne({ where: { id } });
     if (!code) {
@@ -137,18 +147,5 @@ export class CodeService {
     code.code = updateCodeDto.code;
     await this.codeRepository.save(code);
     return code;
-  }
-
-  @Cron(CronExpression.EVERY_HOUR) // Run every hour to delete expired codes from the database
-  async removeExpiredCodes() {
-    const now = new Date();
-    const expiredCodes = await this.codeRepository
-      .createQueryBuilder()
-      .where('timetodeleate < :now', { now })
-      .getMany();
-
-    for (const code of expiredCodes) {
-      await this.codeRepository.remove(code);
-    }
   }
 }
