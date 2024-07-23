@@ -5,10 +5,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   modules: [
-      '@nuxt/image',
-      '@nuxtjs/google-fonts',
-      '@pinia/nuxt',
-
+    '@nuxt/image',
+    '@nuxtjs/google-fonts',
+    '@pinia/nuxt',
+    "@nuxtjs/tailwindcss",
+    "shadcn-nuxt"
   ],
   googleFonts: {
     families: {
@@ -26,6 +27,10 @@ export default defineNuxtConfig({
       viewport: 'width=device-width, initial-scale=1',
       title: 'Codether',
     }
+  },
+  shadcn: {
+    prefix: '',
+    componentDir: './components/ui'
   },
   pinia: {
     storesDirs: [
