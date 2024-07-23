@@ -1,5 +1,5 @@
 export class UpdateSocketCodeDto {
-  id: number;
+  shortId: string;
   updatePassword: string;
   code: string;
 }

@@ -7,14 +7,16 @@ export class Code {
   id: number;
 
   @Column()
-  code: string;
+  s3: string;
 
   @Column()
   language: string;
 
   @Column()
-  @Column({ nullable: true })
-  author?: string;
+  shortid: string;
+
+  @Column()
+  author: string;
 
   @Exclude()
   @Column({ nullable: true })
@@ -27,7 +29,7 @@ export class Code {
   @Column({ type: 'timestamp' })
   timeAdded: Date;
 
-  // Specially for cron
+  // Specially for cron if we want to delete the code after a certain time
   @Column({
     name: 'timetodeleate',
     type: 'timestamp',

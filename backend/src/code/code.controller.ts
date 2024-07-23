@@ -14,12 +14,12 @@ export class CodeController {
   }
 
   @Post('/get/:id')
-  findOne(@Param('id') id: string, @Body() findCodeDto: FindCodeDto) {
-    return this.codeService.findOne(+id, findCodeDto);
+  findOne(@Param('id') shortid: string, @Body() findCodeDto: FindCodeDto) {
+    return this.codeService.findOne(shortid, findCodeDto);
   }
 
   @Patch('/update/:id')
-  update(@Param('id') id: string, @Body() updateCodeDto: UpdateCodeDto) {
-    return this.codeService.update(+id, updateCodeDto);
+  update(@Param('id') shortid: string, @Body() updateCodeDto: UpdateCodeDto) {
+    return this.codeService.update(shortid, updateCodeDto);
   }
 }
