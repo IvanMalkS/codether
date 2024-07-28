@@ -130,8 +130,8 @@ export class CodeService {
     if (codeMeta.viewPassword) {
       if (!findCodeDto.viewPassword) {
         throw new BadRequestException({
-          errorCode: 'VIEW_PASSWORD_NOT_SET',
-          errorMessage: 'View password not set',
+          errorCode: 'INVALID_VIEW_PASSWORD',
+          errorMessage: 'Invalid view password',
           details: {},
         });
       }
@@ -141,14 +141,15 @@ export class CodeService {
       );
       if (!isViewPasswordValid) {
         throw new BadRequestException({
-          errorCode: 'INVALID_PASSWORD',
+          errorCode: 'INVALID_VIEW_PASSWORD',
           errorMessage: 'Invalid view password',
           details: {},
         });
       }
     }
     const code = await this.s3.getFile(codeMeta.s3);
-    return classToPlain({ ...codeMeta, code });
+    const transformedCodeMeta = classToPlain(codeMeta);
+    return { ...transformedCodeMeta, code };
   }
 
   // Limit rate of files uploaded to 10 per minute

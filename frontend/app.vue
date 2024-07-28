@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import '/assets/css/tailwind.css'
 import Toaster from '@/components/ui/toast/Toaster.vue'
+onBeforeMount(() => {
+  if( window.matchMedia('(prefers-color-scheme: dark)').matches )
+  {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+})
 </script>
 
 <template>
-  <div class="page-theme" :class="{ 'dark': true }">
-    <NuxtLayout>
+   <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
     <Toaster />
-  </div>
 </template>

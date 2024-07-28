@@ -4,9 +4,11 @@ import { Exclude } from 'class-transformer';
 @Entity()
 export class Code {
   @PrimaryGeneratedColumn()
+  @Exclude()
   id: number;
 
   @Column()
+  @Exclude()
   s3: string;
 
   @Column()

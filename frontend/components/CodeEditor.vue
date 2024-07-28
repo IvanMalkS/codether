@@ -1,5 +1,6 @@
 <template>
-  <section class="code-editor">
+  <section class="code-editor border-2 border-accent">
+    <h2 class="visually-hidden">Monaco Code Editor</h2>
     <div ref="editorContainer" :data-mode-id="props.editorLanguageProps" class="editor-container">
       <div v-if="isEditorLoading" class="code-editor__loading">Загрузка...</div>
     </div>
@@ -9,19 +10,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick, type Ref, watch } from 'vue';
 import { defineEmits } from 'vue';
+import debounce from 'lodash/debounce';
 
-const emit = defineEmits(['code-updated']);
-const props = defineProps({
-  editorLanguageProps: {
-    type: String,
-    default: 'javascript',
-  },
-  codeValue: {
-    type: String,
-  }
-});
-
-const defaultCodeSnippets: Record<string, string> = {
+const DEFAULT_CODE_SNIPPETS: Record<string, string> = {
   javascript: 'function hello() {\n\talert("Hello, world!");\n}',
   python: 'def hello():\n\tprint("Hello, world!")',
   java: 'public class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello, World!");\n\t}\n}',
@@ -38,13 +29,28 @@ const defaultCodeSnippets: Record<string, string> = {
   go: 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, world!")\n}',
 };
 
+const emit = defineEmits(['code-updated']);
+const props = defineProps({
+  editorLanguageProps: {
+    type: String,
+    default: 'javascript',
+  },
+  codeValueProps: {
+    type: String,
+  },
+  codeEditorReadonly: {
+    type: Boolean,
+    default: false,
+  },
+});
+
 const editorContainer: Ref<HTMLElement | null> = ref(null);
 let editor: any = null;
 const isEditorLoading = ref(true);
 
 const initializeEditor = () => {
   if (editorContainer.value) {
-    const defaultCode = props.codeValue || defaultCodeSnippets[props.editorLanguageProps] || 'function hello() {\n\talert("Hello, world!");\n}'; // Fallback to JavaScript if no match
+    const defaultCode = props.codeValueProps || DEFAULT_CODE_SNIPPETS[props.editorLanguageProps] || 'function hello() {\n\talert("Hello, world!");\n}'; // Fallback to JavaScript if no match
     // @ts-ignore
     editor = monaco.editor.create(editorContainer.value, {
       value: defaultCode,
@@ -52,18 +58,22 @@ const initializeEditor = () => {
       theme: 'vs-dark',
       automaticLayout: true,
       minimap: { enabled: window.innerWidth > 600 },
-      fontSize: window.innerWidth <= 600 ? 12 : 14,
+      fontSize: window.innerWidth <= 320 ? 12 : 24,
       renderLineHighlight: 'all',
-      wordWrap: 'on'
+      wordWrap: 'on',
+      readOnly: props.codeEditorReadonly,
     });
-    isEditorLoading.value = false;
+    attachChangeEvent();
   }
+  isEditorLoading.value = false;
 };
 
 const attachChangeEvent = () => {
   if (editor) {
+    let currentCode = editor.getValue();
+    emit('code-updated', currentCode);
     editor.onDidChangeModelContent(() => {
-      const currentCode = editor.getValue();
+      currentCode = editor.getValue();
       emit('code-updated', currentCode);
     });
   }
@@ -91,21 +101,37 @@ const loadMonacoEditor = () => {
   }
 };
 
-watch(() => props.editorLanguageProps, (newVal) => {
+const updateEditorLanguage = debounce((newLanguage: string) => {
   if (editor) {
-    const newCode = defaultCodeSnippets[newVal] || 'function hello() {\n\talert("Hello, world!");\n}'; // Fallback to JavaScript if no match
-    const model = monaco.editor.createModel(newCode, newVal);
+    const newCode = DEFAULT_CODE_SNIPPETS[newLanguage] || 'function hello() {\n\talert("Hello, world!");\n}'; // Fallback to JavaScript if no match
+    const model = monaco.editor.createModel(newCode, newLanguage);
     editor.setModel(model);
   } else {
-    initializeEditor(); // Initialize the editor if it's not already initialized
+    initializeEditor();
   }
+}, 100);
+
+watch(() => props.editorLanguageProps, (newVal) => {
+  updateEditorLanguage(newVal);
 }, { immediate: true });
+
+const updateEditorContent = debounce((newCode) => {
+  if (editor && newCode !== editor.getValue()) {
+    editor.setValue(newCode);
+  }
+}, 300);
+
+watch(() => props.codeValueProps, (newCode) => {
+  updateEditorContent(newCode);
+}, { immediate: true });
+
 
 onMounted(() => {
   nextTick().then(() => {
     loadMonacoEditor();
 
     if (typeof window !== 'undefined') {
+      window.addEventListener('load',updateEditorSettings)
       window.addEventListener('resize', updateEditorSettings);
     }
   });
@@ -117,6 +143,7 @@ onBeforeUnmount(() => {
   }
 
   if (typeof window !== 'undefined') {
+    window.removeEventListener('load',updateEditorSettings)
     window.removeEventListener('resize', updateEditorSettings);
   }
 });
@@ -124,7 +151,7 @@ onBeforeUnmount(() => {
 const updateEditorSettings = () => {
   if (editor) {
     editor.updateOptions({
-      fontSize: window.innerWidth <= 600 ? 12 : 20,
+      fontSize: window.innerWidth <= 320 ? 12 : 24,
       minimap: { enabled: window.innerWidth > 600 }
     });
   }
@@ -133,30 +160,17 @@ const updateEditorSettings = () => {
 
 <style scoped>
 .code-editor {
-  height: 400px;
-  border: 1px solid #45A29E;
+  height: 100%;
   position: relative;
   background-color: #1E1E1E;
 }
 
 .editor-container {
   height: 100%;
-  border: 1px solid #45A29E;
   position: relative;
   background-color: #1E1E1E;
 }
 
-@media (max-width: 600px) {
-  .code-editor {
-    height: 400px;
-  }
-}
-
-@media (max-width: 480px) {
-  .code-editor {
-    height: 300px;
-  }
-}
 
 .code-editor__loading {
   width: 100%;

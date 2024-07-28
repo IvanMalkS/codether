@@ -9,7 +9,14 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@pinia/nuxt',
     "@nuxtjs/tailwindcss",
-    "shadcn-nuxt"
+    "shadcn-nuxt",
+    [
+        '@vee-validate/nuxt',
+      {
+        autoImports: true,
+      }
+    ]
+    ,
   ],
   googleFonts: {
     families: {

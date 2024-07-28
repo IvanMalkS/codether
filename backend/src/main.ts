@@ -40,7 +40,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // Initialize app
-  await app.listen(8000);
+  await app.listen(8003);
 
   // Connect Redis
   app.connectMicroservice<MicroserviceOptions>({
